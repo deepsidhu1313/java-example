@@ -40,26 +40,25 @@ public class SyntaxTextArea {
         "switch", "synchronized", "this", "throw", "throws",
         "transient", "try", "void", "volatile", "while"
     };
-private static final String[] SEMICOL = new String[]{";"};
-private static final String[] RBRAC = new String[]{"(",")"};
-private static final String[] SBRAC = new String[]{"[","]"};
-private static final String[] OBRAC = new String[]{"{","}"};
+    private static final String[] SEMICOL = new String[]{";"};
+    private static final String[] RBRAC = new String[]{"(", ")"};
+    private static final String[] SBRAC = new String[]{"[", "]"};
+    private static final String[] OBRAC = new String[]{"{", "}"};
 
     private static final Pattern KEYWORD_PATTERN = Pattern.compile("\\b(" + String.join("|", KEYWORDS) + ")\\b");
-    private static final Pattern SEMICOL_PATTERN = Pattern.compile("\\b(" + String.join("|", SEMICOL) + ")\\b");
-   // private static final Pattern RBRAC_PATTERN = Pattern.compile("\\b(" + String.join("|", RBRAC) + ")\\b");
-    private static final Pattern SBRAC_PATTERN = Pattern.compile("\\b(" + String.join("|", SBRAC) + ")\\b");
-  //  private static final Pattern OBRAC_PATTERN = Pattern.compile("\\b(" + String.join("|", OBRAC) + ")\\b");
-private static final Pattern PATTERN = Pattern.compile(
-        "(?<KEYWORDS>" + KEYWORD_PATTERN + ")" +
-        "|" +
-       // "(?<SEMICOL>" +SEMICOL_PATTERN + ")" +
-      //  "|" +
-     //   "(?<RBRAC>" + RBRAC_PATTERN + ")" +
-      //  "|" +
-        "(?<SBRAC>" + SBRAC_PATTERN + ")" +
-        "|" +
-        "(?<SEMICOL>" + SEMICOL_PATTERN + ")");
+    private static final String SEMICOL_PATTERN = ("(" + String.join("|", SEMICOL) + ")");
+    private static final String RBRAC_PATTERN = ("(" + String.join("|", RBRAC) + ")");
+    private static final String SBRAC_PATTERN = ("(" + String.join("|", SBRAC) + ")");
+    private static final String OBRAC_PATTERN = ("(" + String.join("|", OBRAC) + ")");
+    private static final Pattern PATTERN = Pattern.compile(
+            "(?<KEYWORDS>" + KEYWORD_PATTERN + ")"
+            + "|"
+            + "(?<RBRAC>" + RBRAC_PATTERN + ")"
+            + "|"
+            + "(?<SBRAC>" + SBRAC_PATTERN + ")"
+            + "|"
+            + "(?<SEMICOL>" + SEMICOL_PATTERN + ")"
+    );
     private CodeArea codeArea;
     private ExecutorService executor;
 
@@ -77,7 +76,7 @@ private static final Pattern PATTERN = Pattern.compile(
                 .awaitLatest(textChanges)
                 .subscribe(this::applyHighlighting);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        
+
         codeArea.getStylesheets().add(SyntaxTextArea.class.getResource("java-keywords.css").toExternalForm());
     }
 
@@ -128,20 +127,20 @@ private static final Pattern PATTERN = Pattern.compile(
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder
                 = new StyleSpansBuilder<>();
-        while(matcher.find()) {
-        String styleClass = matcher.group("KEYWORDS") != null ? "keyword" :
-            matcher.group("SEMICOL") != null ? "semicol" :
-            //matcher.group("RBRAC") != null ? "rbrac" :
-            matcher.group("SBRAC") != null ? "sbrac" :
-          //  matcher.group("OBRAC") != null ? "obrac" :
-            "purple";
-        spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
-        spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
-        lastKwEnd = matcher.end();
-    }
-    spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
-    return spansBuilder.create();
-       
+        while (matcher.find()) {
+            String styleClass
+                    = matcher.group("SEMICOL") != null ? "semicol"
+                            : matcher.group("SBRAC") != null ? "sbrac"
+                                    : matcher.group("RBRAC") != null ? "rbrac"
+                                                    : matcher.group("KEYWORDS") != null ? "keyword"
+                                                            : "purple";
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
+
     }
 
 }
